@@ -32,7 +32,7 @@ install () {
     mkdir -p $builddir
 
     pushd $builddir
-    
+
     cmake \
       -DCMAKE_INSTALL_PREFIX="$prefix" \
       -DCMAKE_BUILD_TYPE="Release" \
@@ -59,18 +59,21 @@ install_haswell () {
 
     __target=${CRAY_CPU_TARGET}
     module swap craype-${__target} craype-haswell
+    module load cmake git metis-64 cray-libsci
+
     __pe=$(tolower $PE_ENV)
-    pes=(cray gnu intel)
-
-    echo $__pe
-
+    # PrgEnv-cray and PrgEnv-gnu not supported because METIS is only built for
+    # PrgEnv-intel -- TODO: switch to parmetis libray for these
+    # pes=(cray gnu intel)
+    pes=(intel)
     last_pe=$__pe
+
     for pe in ${pes[@]}
     do
         module swap PrgEnv-$last_pe PrgEnv-$pe
-        module load julia cmake git metis cray-libsci
         install haswell $pe $1
     done
+
     module swap PrgEnv-$last_pe PrgEnv-$__pe
     module swap craype-haswell craype-${__target}
 }
