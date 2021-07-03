@@ -32,7 +32,7 @@ install() {
     sourcedir=${root_prefix}/$3
     prefix=${root_prefix}/${arch}/${craype}
     builddir=${root_prefix}/${arch}/${craype}/build
-    nproc=8
+    nproc=16
 
     # TODO: this only works with MKL at the moment => disable non-intel PEs
     if [[ $craype != "intel" ]]
@@ -68,31 +68,40 @@ install() {
 }
 
 
-install_haswell () {
+install_all () {
 
-    __target=${CRAY_CPU_TARGET}
-    module swap craype-${__target} craype-haswell
     # module load cmake git metis-64 cray-libsci
     module load cmake git metis-64
 
-    __pe=$(tolower $PE_ENV)
-    # TODO: problems with the different environments:
-    # 1. metis is only available in intel (but maybe parmetis is fine)
-    # 2. intel mkl / libsci blas don't seem to work and the intel compiler
-    #    doesn't seem to want to compile the -- autmatically downloaded --
-    #    OpenBLAS
-    # pes=(cray gnu intel)
-    pes=(intel)
-    last_pe=$__pe
-
-    for pe in ${pes[@]}
+    __target=${CRAY_CPU_TARGET}
+    targets=(haswell mic-knl)
+    last_target=${__target}
+    for target in ${targets[@]}
     do
-        module swap PrgEnv-$last_pe PrgEnv-$pe
-        install haswell $pe $1
+        module swap craype-${last_target} craype-${target}
+
+        __pe=$(tolower $PE_ENV)
+        # TODO: problems with the different environments:
+        # 1. metis is only available in intel (but maybe parmetis is fine)
+        # 2. intel mkl / libsci blas don't seem to work and the intel compiler
+        #    doesn't seem to want to compile the -- autmatically downloaded --
+        #    OpenBLAS
+        # pes=(cray gnu intel)
+        pes=(intel)
+        last_pe=$__pe
+
+        for pe in ${pes[@]}
+        do
+            module swap PrgEnv-${last_pe} PrgEnv-${pe}
+            install ${target} ${pe} $1
+            last_pe=${pe}
+        done
+
+        module swap PrgEnv-${last_pe} PrgEnv-${__pe}
+        last_target=${target}
     done
 
-    module swap PrgEnv-$last_pe PrgEnv-$__pe
-    module swap craype-haswell craype-${__target}
+    module swap craype-${last_target} craype-${__target}
 }
 
 
@@ -100,9 +109,10 @@ if [[ $1 == "clean" ]]
 then
     echo "Cleaning build path."
     if [[ -d haswell ]]; then rm -rf haswell; fi
+    if [[ -d mic-knl ]]; then rm -rf mic-knl; fi
     if [[ -d Elemental ]]; then rm -rf Elemental; fi
     exit 0
 fi
 
 get_source $git_repo Elemental $git_rev
-install_haswell Elemental
+install_all Elemental
