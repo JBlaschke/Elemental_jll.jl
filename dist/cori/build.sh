@@ -11,6 +11,11 @@ tolower () { echo $1 | awk '{ print tolower($1) }'; }
 
 
 get_source () {
+    if [[ -d $2 ]]
+    then
+        return 0
+    fi
+
     git clone $1
     pushd $2
     git checkout $3
@@ -18,7 +23,7 @@ get_source () {
 }
 
 
-install () {
+install() {
 
     root_prefix=$(readlink -f $(dirname ${BASH_SOURCE[0]}))
 
@@ -27,6 +32,14 @@ install () {
     sourcedir=${root_prefix}/$3
     prefix=${root_prefix}/${arch}/${craype}
     builddir=${root_prefix}/${arch}/${craype}/build
+    nproc=8
+
+    # TODO: this only works with MKL at the moment => disable non-intel PEs
+    if [[ $craype != "intel" ]]
+    then
+        echo "libEl needs MKL (for now), please compile with PrgEnv-intel".
+        return 1
+    fi
 
     mkdir -p $prefix
     mkdir -p $builddir
@@ -41,11 +54,9 @@ install () {
       -DEL_DISABLE_PARMETIS="ON" \
       -DMETIS_TEST_RUNS_EXITCODE="0" \
       -DMETIS_TEST_RUNS_EXITCODE__TRYRUN_OUTPUT="" \
-      -DMATH_LIBS="${CRAY_LIBSCI_PREFIX_DIR}/lib" \
-      -DBLAS_LIBRARIES="${CRAY_LIBSCI_PREFIX_DIR}/lib" \
-      -DLAPACK_LIBRARIES="${CRAY_LIBSCI_PREFIX_DIR}/lib" \
-      -DEL_BLAS_SUFFIX="${CRAY_LIBSCI_PREFIX_DIR}/lib" \
-      -DEL_LAPACK_SUFFIX="${CRAY_LIBSCI_PREFIX_DIR}/lib" \
+      -DMATH_LIBS="-mkl" \
+      -DBLAS_LIBRARIES="/usr/lib64/" \
+      -DLAPACK_LIBRARIES="/usr/lib64/lapack/" \
       ${sourcedir}
 
     make "-j$nproc"
@@ -59,11 +70,15 @@ install_haswell () {
 
     __target=${CRAY_CPU_TARGET}
     module swap craype-${__target} craype-haswell
-    module load cmake git metis-64 cray-libsci
+    # module load cmake git metis-64 cray-libsci
+    module load cmake git metis-64
 
     __pe=$(tolower $PE_ENV)
-    # PrgEnv-cray and PrgEnv-gnu not supported because METIS is only built for
-    # PrgEnv-intel -- TODO: switch to parmetis libray for these
+    # TODO: problems with the different environments:
+    # 1. metis is only available in intel (but maybe parmetis is fine)
+    # 2. intel mkl / libsci blas don't seem to work and the intel compiler
+    #    doesn't seem to want to compile the -- autmatically downloaded --
+    #    OpenBLAS
     # pes=(cray gnu intel)
     pes=(intel)
     last_pe=$__pe
@@ -79,6 +94,13 @@ install_haswell () {
 }
 
 
+if [[ $1 == "clean" ]]
+then
+    echo "Cleaning build path."
+    if [[ -d haswell ]]; then rm -rf haswell; fi
+    if [[ -d Elemental ]]; then rm -rf Elemental; fi
+    exit 0
+fi
 
 get_source $git_repo Elemental $git_rev
 install_haswell Elemental
