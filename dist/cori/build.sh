@@ -55,9 +55,11 @@ install() {
       -DMETIS_TEST_RUNS_EXITCODE="0" \
       -DMETIS_TEST_RUNS_EXITCODE__TRYRUN_OUTPUT="" \
       -DMATH_LIBS="-mkl" \
-      -DBLAS_LIBRARIES="/usr/lib64/" \
-      -DLAPACK_LIBRARIES="/usr/lib64/lapack/" \
+      -DMETIS_LIBRARY="${METIS_LIB}" \
       ${sourcedir}
+      # -DBLAS_LIBRARIES="/usr/lib64/" \
+      # -DLAPACK_LIBRARIES="/usr/lib64/lapack/" \
+      # ${sourcedir}
 
     make "-j$nproc"
     make install
