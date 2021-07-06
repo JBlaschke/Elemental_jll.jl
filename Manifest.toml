@@ -1,0 +1,8 @@
+# This file is machine-generated - editing it directly is not advised
+
+[[ThinJLLWrapers]]
+git-tree-sha1 = "ed24afef8538ea266afc239260092b183a007956"
+repo-rev = "main"
+repo-url = "../ThinJLLWrapers.jl"
+uuid = "569f6cd2-a840-479d-9470-22f99e827c8f"
+version = "0.1.0"
