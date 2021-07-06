@@ -67,8 +67,18 @@ install() {
       # -DLAPACK_LIBRARIES="/usr/lib64/lapack/" \
       # ${sourcedir}
 
-    make "-j${nproc}" VERBOSE=ON
+    make "-j${nproc}" VERBOSE=1
     make install
+
+    pushd ${prefix}/lib
+    ${root_prefix}/../../modules/bin/patchelf --replace-needed \
+        external/pmrrr/libpmrrr.so \
+        libpmrrr.so libEl.so
+
+    ${root_prefix}/../../modules/bin/patchelf --replace-needed \
+        external/suite_sparse/libElSuiteSparse.so \
+        libElSuiteSparse.so libEl.so
+    popd
 
     popd
 }
