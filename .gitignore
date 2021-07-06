@@ -1,3 +1,6 @@
 dist/cori/Elemental/
 dist/cori/haswell/
 dist/cori/mic-knl/
+
+modules/bin/
+modules/share/

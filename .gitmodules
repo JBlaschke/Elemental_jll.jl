@@ -1,0 +1,3 @@
+[submodule "modules/patchelf"]
+	path = modules/patchelf
+	url = git@github.com:NixOS/patchelf.git

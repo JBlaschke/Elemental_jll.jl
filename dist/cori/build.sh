@@ -35,33 +35,39 @@ install() {
     nproc=16
 
     # TODO: this only works with MKL at the moment => disable non-intel PEs
-    if [[ $craype != "intel" ]]
+    if [[ ${craype} != intel ]]
     then
         echo "libEl needs MKL (for now), please compile with PrgEnv-intel".
         return 1
     fi
 
-    mkdir -p $prefix
-    mkdir -p $builddir
+    mkdir -p ${prefix}
+    mkdir -p ${builddir}
 
-    pushd $builddir
+    pushd ${builddir}
+
+    export CRAYPE_LINK_TYPE=dynamic
 
     cmake \
-      -DCMAKE_INSTALL_PREFIX="$prefix" \
+      -DCMAKE_SYSTEM_NAME="CrayLinuxEnvironment" \
+      -DCMAKE_POSITION_INDEPENDENT_CODE="ON" \
+      -DCMAKE_CXX_FLAGS_INIT="-std=c++11 -fPIC" \
+      -DCMAKE_C_FLAGS_INIT="-fPIC" \
+      -DCMAKE_INSTALL_PREFIX="${prefix}" \
       -DCMAKE_BUILD_TYPE="Release" \
       -DEL_USE_64BIT_INTS="ON" \
       -DEL_USE_64BIT_BLAS_INTS="ON" \
       -DEL_DISABLE_PARMETIS="ON" \
       -DMETIS_TEST_RUNS_EXITCODE="0" \
       -DMETIS_TEST_RUNS_EXITCODE__TRYRUN_OUTPUT="" \
-      -DMATH_LIBS="-mkl" \
+      -DMATH_LIBS="-mkl ${METIS}" \
       -DMETIS_LIBRARY="${METIS_LIB}" \
       ${sourcedir}
       # -DBLAS_LIBRARIES="/usr/lib64/" \
       # -DLAPACK_LIBRARIES="/usr/lib64/lapack/" \
       # ${sourcedir}
 
-    make "-j$nproc"
+    make "-j${nproc}" VERBOSE=ON
     make install
 
     popd
@@ -70,8 +76,8 @@ install() {
 
 install_all () {
 
-    # module load cmake git metis-64 cray-libsci
-    module load cmake git metis-64
+    # module load cmake git metis-64 cray-libsci python
+    module load cmake git metis-64 python
 
     __target=${CRAY_CPU_TARGET}
     targets=(haswell mic-knl)
@@ -110,9 +116,19 @@ then
     echo "Cleaning build path."
     if [[ -d haswell ]]; then rm -rf haswell; fi
     if [[ -d mic-knl ]]; then rm -rf mic-knl; fi
+    exit 0
+fi
+
+if [[ $1 == "realclean" ]]
+then
+    echo "Cleaning build and source path."
+    if [[ -d haswell ]]; then rm -rf haswell; fi
+    if [[ -d mic-knl ]]; then rm -rf mic-knl; fi
     if [[ -d Elemental ]]; then rm -rf Elemental; fi
     exit 0
 fi
+
+
 
 get_source $git_repo Elemental $git_rev
 install_all Elemental
