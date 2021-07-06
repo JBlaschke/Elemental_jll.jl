@@ -22,7 +22,9 @@ libpmrrr_path   = ""
 
 function __init__()
     # Make sure that the JLL_LIBRARY_PATH entries
-    ensure_jll_path()
+    if ! ensure_jll_path()
+        error("JLL_LIBRARY_PATH not in LD_LIBRARY_PATH, make sure you run `module load Elemental_jll` before starting Julia")
+    end
 
     libEl_path   = find_path(libEl)
     libEl_handle = jll_open(libEl_path)
