@@ -26,14 +26,14 @@ function __init__()
         error("JLL_LIBRARY_PATH not in LD_LIBRARY_PATH, make sure you run `module load Elemental_jll` before starting Julia")
     end
 
-    libEl_path   = find_path(libEl)
-    libEl_handle = jll_open(libEl_path)
+    global libEl_path   = find_path(libEl)
+    global libEl_handle = jll_open(libEl_path)
 
-    libElSuiteSparse_path   = find_path(libElSuiteSparse)
-    libElSuiteSparse_handle = jll_open(libElSuiteSparse_path)
+    global libElSuiteSparse_path   = find_path(libElSuiteSparse)
+    global libElSuiteSparse_handle = jll_open(libElSuiteSparse_path)
 
-    libpmrrr_path   = find_path(libpmrrr)
-    libpmrrr_handle = jll_open(libpmrrr_path)
+    global libpmrrr_path   = find_path(libpmrrr)
+    global libpmrrr_handle = jll_open(libpmrrr_path)
 end
 
 end # module
