@@ -4,3 +4,5 @@ dist/cori/mic-knl/
 
 modules/bin/
 modules/share/
+
+dist/cori/modulefiles/Elemental_jll/1.0.0
