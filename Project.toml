@@ -1,7 +1,8 @@
 name = "Elemental_jll"
-uuid = "2e5e02e5-8837-431e-934d-6de2685cfcc9"
+uuid = "c2e960f2-a21d-557e-aa36-859d46eed7e8"
 authors = ["Johannes Blaschke <jpblaschke@lbl.gov>"]
-version = "0.1.0"
+version = "0.87.7+nerscpatch"
+
 
 [deps]
 ThinJLLWrapers = "569f6cd2-a840-479d-9470-22f99e827c8f"
