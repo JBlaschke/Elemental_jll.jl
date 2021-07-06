@@ -53,7 +53,7 @@ module-whatis    "\$description"
 ## Software-specific settings exported to user environment
 prepend-path    LD_LIBRARY_PATH     \$root/lib
 prepend-path    LD_LIBRARY_PATH     \$env(METIS_LIB)
-setenv          JLL_LIBRARY_PATH    \$root/lib:\$env(METIS_LIB)
+prepend-path    JLL_LIBRARY_PATH    \$root/lib:\$env(METIS_LIB)
 
 ## MODS reporting
 if [ module-info mode load ] {
